@@ -27,5 +27,16 @@ def get_all_employees():
     
     return make_response(jsonify(rv), 200)
 
+@app.route("/employees/<emp_no>", methods=["GET"])
+def get_employee_by_employee_number(emp_no):
+    cur = mysql.connection.cursor()
+    cur.execute("""SELECT * FROM employees WHERE emp_no = %s""", (emp_no,))
+    rv = cur.fetchall()
+    cur.close()
+
+    return make_response(jsonify(rv), 200)
+
+
+
 if __name__ == "__main__":
     app.run(debug=True)
