@@ -71,5 +71,20 @@ def get_department_managers(dept_no):
     return make_response(jsonify(rv), 200)
 
 
+@app.route("/employees/<emp_no>/salaries", methods=["GET"])
+def get_employee_salaries(emp_no):
+    cur = mysql.connection.cursor()
+    cur.execute("""
+        SELECT e.emp_no, e.first_name, e.last_name, s.salary, s.from_date, s.to_date
+        FROM employees e
+        JOIN salaries s ON e.emp_no = s.emp_no
+        WHERE e.emp_no = %s
+        """, [emp_no])
+    rv = cur.fetchall()
+    cur.close()
+
+    return make_response(jsonify(rv), 200)
+
+
 if __name__ == "__main__":
     app.run(debug=True)
