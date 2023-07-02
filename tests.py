@@ -43,5 +43,12 @@ class MyAppTests(unittest.TestCase):
         self.assertIn(b"Oscar", response.data)
         self.assertNotIn(b"Peternela", response.data)
 
+
+    def test_get_employee_salaries(self):
+        response = self.app.get("/employees/110420/salaries")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"53978", response.data)
+        self.assertNotIn(b"50000", response.data)
+
 if __name__ == "__main__":
     unittest.main()
