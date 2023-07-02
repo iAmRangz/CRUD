@@ -36,5 +36,12 @@ class MyAppTests(unittest.TestCase):
         self.assertIn(b"Production", response.data)
         self.assertNotIn(b"Sales", response.data)
 
+
+    def test_get_department_managers(self):
+        response = self.app.get("/departments/d004/managers")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Oscar", response.data)
+        self.assertNotIn(b"Peternela", response.data)
+
 if __name__ == "__main__":
     unittest.main()
