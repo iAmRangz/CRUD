@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, make_response
+from flask import Flask, jsonify, make_response, request
 from flask_mysqldb import MySQL
 
 app = Flask(__name__)
@@ -70,6 +70,15 @@ def get_employee_salaries(emp_no):
         WHERE e.emp_no = %s
         """, [emp_no])
     return make_response(jsonify(rv), 200)
+
+
+@app.route("/employees", methods=["POST"])
+def create_employee():
+    data = request.json
+    execute_query("INSERT INTO employees (first_name, last_name, hire_date, gender, birth_date) VALUES (%s, %s, %s, %s, %s)",
+                  (data["first_name"], data["last_name"], data["hire_date"], data["gender"], data["birth_date"]))
+    mysql.connection.commit()
+    return make_response(jsonify({"result": "Employee created"}), 201)
 
 
 if __name__ == "__main__":
