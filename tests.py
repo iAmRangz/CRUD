@@ -27,6 +27,14 @@ class MyAppTests(unittest.TestCase):
         response = self.app.get("/employees/10069")
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Margareta", response.data)
+        self.assertNotIn(b"Georgi", response.data)
+
+    
+    def test_get_employee_department(self):
+        response = self.app.get("/employees/10069/department")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Production", response.data)
+        self.assertNotIn(b"Sales", response.data)
 
 if __name__ == "__main__":
     unittest.main()
