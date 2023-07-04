@@ -1,5 +1,6 @@
 import unittest
 import warnings
+import json
 from crud_app import app
 
 
@@ -49,6 +50,22 @@ class MyAppTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"53978", response.data)
         self.assertNotIn(b"50000", response.data)
+
+
+    def test_create_employee(self):
+        new_employee = {
+            "first_name": "Test",
+            "last_name": "Employee",
+            "hire_date": "2023-07-01",
+            "gender": "M",
+            "birth_date": "1990-01-01"
+        }
+        response = self.app.post("/employees", 
+                                data=json.dumps(new_employee),
+                                content_type='application/json')
+        self.assertEqual(response.status_code, 201)
+        self.assertIn(b"Employee created", response.data)
+
 
 if __name__ == "__main__":
     unittest.main()

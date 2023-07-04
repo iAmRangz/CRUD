@@ -13,12 +13,14 @@ mysql = MySQL(app)
 
 
 def execute_query(query, params=None):
-    cur = mysql.connection.cursor()
-    cur.execute(query, params)
-    rv = cur.fetchall()
-    cur.close()
-    return rv
-
+    try:
+        cur = mysql.connection.cursor()
+        cur.execute(query, params)
+        rv = cur.fetchall()
+        cur.close()
+        return rv
+    except Exception as e:
+        return {"error": str(e)}
 
 @app.route("/")
 def index():
@@ -28,12 +30,16 @@ def index():
 @app.route("/employees", methods=["GET"])
 def get_all_employees():
     rv = execute_query("SELECT * FROM employees")
+    if "error" in rv:
+        return make_response(jsonify({"error": "Database error"}), 500)
     return make_response(jsonify(rv), 200)
 
 
 @app.route("/employees/<emp_no>", methods=["GET"])
 def get_employee_by_employee_number(emp_no):
     rv = execute_query("SELECT * FROM employees WHERE emp_no = %s", (emp_no,))
+    if "error" in rv:
+        return make_response(jsonify({"error": "Database error"}), 500)
     return make_response(jsonify(rv), 200)
 
 
@@ -46,6 +52,8 @@ def get_employee_department(emp_no):
         JOIN departments d ON de.dept_no = d.dept_no
         WHERE e.emp_no = %s AND de.to_date > NOW()
         """, [emp_no])
+    if "error" in rv:
+        return make_response(jsonify({"error": "Database error"}), 500)
     return make_response(jsonify(rv), 200)
 
 
@@ -58,6 +66,8 @@ def get_department_managers(dept_no):
         JOIN employees e ON dm.emp_no = e.emp_no
         WHERE d.dept_no = %s
         """, [dept_no])
+    if "error" in rv:
+        return make_response(jsonify({"error": "Database error"}), 500)
     return make_response(jsonify(rv), 200)
 
 
@@ -69,15 +79,21 @@ def get_employee_salaries(emp_no):
         JOIN salaries s ON e.emp_no = s.emp_no
         WHERE e.emp_no = %s
         """, [emp_no])
+    if "error" in rv:
+        return make_response(jsonify({"error": "Database error"}), 500)
     return make_response(jsonify(rv), 200)
 
 
 @app.route("/employees", methods=["POST"])
 def create_employee():
     data = request.json
-    execute_query("INSERT INTO employees (first_name, last_name, hire_date, gender, birth_date) VALUES (%s, %s, %s, %s, %s)",
-                  (data["first_name"], data["last_name"], data["hire_date"], data["gender"], data["birth_date"]))
-    mysql.connection.commit()
+    try:
+        execute_query("INSERT INTO employees (first_name, last_name, hire_date, gender, birth_date) VALUES (%s, %s, %s, %s, %s)",
+                      (data["first_name"], data["last_name"], data["hire_date"], data["gender"], data["birth_date"]))
+        mysql.connection.commit()
+    except Exception as e:
+        mysql.connection.rollback()
+        return make_response(jsonify({"error": str(e)}), 500)
     return make_response(jsonify({"result": "Employee created"}), 201)
 
 
