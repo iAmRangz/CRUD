@@ -106,5 +106,20 @@ def create_employee():
     return make_response(jsonify({"result": "Employee created"}), 201)
 
 
+@app.route("/employees/<emp_no>", methods=["PUT"])
+def update_employee(emp_no):
+    data = request.json
+    if not employee_exists(emp_no):
+        return make_response(jsonify({"error": "Employee not found"}), 404)
+
+    try:
+        execute_query("""UPDATE employees SET first_name = %s, last_name = %s WHERE emp_no = %s""",
+                      (data["first_name"], data["last_name"], emp_no))
+        mysql.connection.commit()
+    except Exception as e:
+        mysql.connection.rollback()
+        return make_response(jsonify({"error": str(e)}), 500)
+    return make_response(jsonify({"result": "Employee updated"}), 200)
+
 if __name__ == "__main__":
     app.run(debug=True)
