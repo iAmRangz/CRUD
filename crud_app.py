@@ -21,6 +21,11 @@ def execute_query(query, params=None):
         return rv
     except Exception as e:
         return {"error": str(e)}
+    
+
+def employee_exists(emp_no):
+    rv = execute_query("SELECT * FROM employees WHERE emp_no = %s", [emp_no])
+    return len(rv) > 0
 
 @app.route("/")
 def index():
@@ -87,6 +92,10 @@ def get_employee_salaries(emp_no):
 @app.route("/employees", methods=["POST"])
 def create_employee():
     data = request.json
+    required_fields = ["first_name", "last_name", "hire_date", "gender", "birth_date"]
+    if not all(field in data for field in required_fields):
+        return make_response(jsonify({"error": "Missing required field"}), 400)
+
     try:
         execute_query("INSERT INTO employees (first_name, last_name, hire_date, gender, birth_date) VALUES (%s, %s, %s, %s, %s)",
                       (data["first_name"], data["last_name"], data["hire_date"], data["gender"], data["birth_date"]))
