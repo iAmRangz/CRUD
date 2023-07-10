@@ -27,6 +27,7 @@ def employee_exists(emp_no):
     rv = execute_query("SELECT * FROM employees WHERE emp_no = %s", [emp_no])
     return len(rv) > 0
 
+
 @app.route("/")
 def index():
     return "Blank Homepage muna!"
@@ -45,6 +46,8 @@ def get_employee_by_employee_number(emp_no):
     rv = execute_query("SELECT * FROM employees WHERE emp_no = %s", (emp_no,))
     if "error" in rv:
         return make_response(jsonify({"error": "Database error"}), 500)
+    if not rv:
+        return make_response(jsonify({"error": "Employee not found"}), 404)
     return make_response(jsonify(rv), 200)
 
 
@@ -59,6 +62,8 @@ def get_employee_department(emp_no):
         """, [emp_no])
     if "error" in rv:
         return make_response(jsonify({"error": "Database error"}), 500)
+    if not rv:
+        return make_response(jsonify({"error": "Employee not found"}), 404)
     return make_response(jsonify(rv), 200)
 
 
@@ -73,6 +78,8 @@ def get_department_managers(dept_no):
         """, [dept_no])
     if "error" in rv:
         return make_response(jsonify({"error": "Database error"}), 500)
+    if not rv:
+        return make_response(jsonify({"error": "Department not found"}), 404)
     return make_response(jsonify(rv), 200)
 
 
@@ -86,6 +93,8 @@ def get_employee_salaries(emp_no):
         """, [emp_no])
     if "error" in rv:
         return make_response(jsonify({"error": "Database error"}), 500)
+    if not rv:
+        return make_response(jsonify({"error": "Employee not found"}), 404)
     return make_response(jsonify(rv), 200)
 
 
