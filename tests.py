@@ -54,8 +54,9 @@ class MyAppTests(unittest.TestCase):
 
     def test_create_employee(self):
         new_employee = {
-            "first_name": "Test",
-            "last_name": "Employee",
+            "emp_no": "69",
+            "first_name": "Naruto",
+            "last_name": "Uzumaki",
             "hire_date": "2023-07-01",
             "gender": "M",
             "birth_date": "1990-01-01"
@@ -69,17 +70,17 @@ class MyAppTests(unittest.TestCase):
 
     def test_update_employee(self):
         update_employee = {
-            "first_name": "Updated",
-            "last_name": "Name",
+            "first_name": "Hokage Tobirama",
+            "last_name": "Senju",
         }
-        response = self.app.put("/employees/1", 
+        response = self.app.put("/employees/2", 
                                 data=json.dumps(update_employee),
                                 content_type='application/json')
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Employee updated", response.data)
 
     def test_delete_employee(self):
-        response = self.app.delete("/employees/1")
+        response = self.app.delete("/employees/69")
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Employee deleted", response.data)
 

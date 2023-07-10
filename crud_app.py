@@ -92,13 +92,15 @@ def get_employee_salaries(emp_no):
 @app.route("/employees", methods=["POST"])
 def create_employee():
     data = request.json
-    required_fields = ["first_name", "last_name", "hire_date", "gender", "birth_date"]
+    required_fields = ["emp_no", "first_name", "last_name", "hire_date", "gender", "birth_date"]
     if not all(field in data for field in required_fields):
         return make_response(jsonify({"error": "Missing required field"}), 400)
 
     try:
-        execute_query("INSERT INTO employees (first_name, last_name, hire_date, gender, birth_date) VALUES (%s, %s, %s, %s, %s)",
-                      (data["first_name"], data["last_name"], data["hire_date"], data["gender"], data["birth_date"]))
+        result = execute_query("INSERT INTO employees (emp_no, first_name, last_name, hire_date, gender, birth_date) VALUES (%s, %s, %s, %s, %s, %s)",
+                               (data["emp_no"], data["first_name"], data["last_name"], data["hire_date"], data["gender"], data["birth_date"]))
+        if "error" in result:
+            raise Exception(result["error"])
         mysql.connection.commit()
     except Exception as e:
         mysql.connection.rollback()
