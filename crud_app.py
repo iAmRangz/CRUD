@@ -121,5 +121,20 @@ def update_employee(emp_no):
         return make_response(jsonify({"error": str(e)}), 500)
     return make_response(jsonify({"result": "Employee updated"}), 200)
 
+
+@app.route("/employees/<emp_no>", methods=["DELETE"])
+def delete_employee(emp_no):
+    if not employee_exists(emp_no):
+        return make_response(jsonify({"error": "Employee not found"}), 404)
+
+    try:
+        execute_query("""DELETE FROM employees WHERE emp_no = %s""", [emp_no])
+        mysql.connection.commit()
+    except Exception as e:
+        mysql.connection.rollback()
+        return make_response(jsonify({"error": str(e)}), 500)
+    return make_response(jsonify({"result": "Employee deleted"}), 200)
+
+
 if __name__ == "__main__":
     app.run(debug=True)
