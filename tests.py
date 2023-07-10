@@ -67,5 +67,22 @@ class MyAppTests(unittest.TestCase):
         self.assertIn(b"Employee created", response.data)
 
 
+    def test_update_employee(self):
+        update_employee = {
+            "first_name": "Updated",
+            "last_name": "Name",
+        }
+        response = self.app.put("/employees/1", 
+                                data=json.dumps(update_employee),
+                                content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Employee updated", response.data)
+
+    def test_delete_employee(self):
+        response = self.app.delete("/employees/1")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Employee deleted", response.data)
+
+
 if __name__ == "__main__":
     unittest.main()
