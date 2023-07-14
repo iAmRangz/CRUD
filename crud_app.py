@@ -1,5 +1,6 @@
-from flask import Flask, jsonify, make_response, request
+from flask import Flask, jsonify, make_response, request, Response
 from flask_mysqldb import MySQL
+from dicttoxml import dicttoxml
 
 app = Flask(__name__)
 
@@ -33,22 +34,32 @@ def index():
     return "Blank Homepage muna!"
 
 
+def format_response(data, status_code=200):
+    """Formats the response as XML or JSON."""
+    response_format = request.args.get('format', default='json', type=str)
+    if response_format == 'xml':
+        xml = dicttoxml(data)
+        return Response(xml, mimetype='text/xml', status=status_code)
+    else:  # Default to JSON
+        return make_response(jsonify(data), status_code)
+    
+
 @app.route("/employees", methods=["GET"])
 def get_all_employees():
     rv = execute_query("SELECT * FROM employees")
     if "error" in rv:
-        return make_response(jsonify({"error": "Database error"}), 500)
-    return make_response(jsonify(rv), 200)
+        return format_response({"error": "Database error"}, 500)
+    return format_response(rv, 200)
 
 
 @app.route("/employees/<emp_no>", methods=["GET"])
 def get_employee_by_employee_number(emp_no):
     rv = execute_query("SELECT * FROM employees WHERE emp_no = %s", (emp_no,))
     if "error" in rv:
-        return make_response(jsonify({"error": "Database error"}), 500)
+        return format_response({"error": "Database error"}, 500)
     if not rv:
-        return make_response(jsonify({"error": "Employee not found"}), 404)
-    return make_response(jsonify(rv), 200)
+        return format_response({"error": "Employee not found"}, 404)
+    return format_response(rv, 200)
 
 
 @app.route("/employees/<emp_no>/department", methods=["GET"])
@@ -61,10 +72,10 @@ def get_employee_department(emp_no):
         WHERE e.emp_no = %s AND de.to_date > NOW()
         """, [emp_no])
     if "error" in rv:
-        return make_response(jsonify({"error": "Database error"}), 500)
+        return format_response({"error": "Database error"}, 500)
     if not rv:
-        return make_response(jsonify({"error": "Employee not found"}), 404)
-    return make_response(jsonify(rv), 200)
+        return format_response({"error": "Employee not found"}, 404)
+    return format_response(rv, 200)
 
 
 @app.route("/departments/<dept_no>/managers", methods=["GET"])
@@ -77,10 +88,10 @@ def get_department_managers(dept_no):
         WHERE d.dept_no = %s
         """, [dept_no])
     if "error" in rv:
-        return make_response(jsonify({"error": "Database error"}), 500)
+        return format_response({"error": "Database error"}, 500)
     if not rv:
-        return make_response(jsonify({"error": "Department not found"}), 404)
-    return make_response(jsonify(rv), 200)
+        return format_response({"error": "Department not found"}, 404)
+    return format_response(rv, 200)
 
 
 @app.route("/employees/<emp_no>/salaries", methods=["GET"])
@@ -92,10 +103,10 @@ def get_employee_salaries(emp_no):
         WHERE e.emp_no = %s
         """, [emp_no])
     if "error" in rv:
-        return make_response(jsonify({"error": "Database error"}), 500)
+        return format_response({"error": "Database error"}, 500)
     if not rv:
-        return make_response(jsonify({"error": "Employee not found"}), 404)
-    return make_response(jsonify(rv), 200)
+        return format_response({"error": "Employee not found"}, 404)
+    return format_response(rv, 200)
 
 
 @app.route("/employees", methods=["POST"])
@@ -103,7 +114,7 @@ def create_employee():
     data = request.json
     required_fields = ["emp_no", "first_name", "last_name", "hire_date", "gender", "birth_date"]
     if not all(field in data for field in required_fields):
-        return make_response(jsonify({"error": "Missing required field"}), 400)
+        return format_response({"error": "Missing required field"}, 400)
 
     try:
         result = execute_query("INSERT INTO employees (emp_no, first_name, last_name, hire_date, gender, birth_date) VALUES (%s, %s, %s, %s, %s, %s)",
@@ -113,15 +124,15 @@ def create_employee():
         mysql.connection.commit()
     except Exception as e:
         mysql.connection.rollback()
-        return make_response(jsonify({"error": str(e)}), 500)
-    return make_response(jsonify({"result": "Employee created"}), 201)
+        return format_response({"error": str(e)}, 500)
+    return format_response({"result": "Employee created"}, 201)
 
 
 @app.route("/employees/<emp_no>", methods=["PUT"])
 def update_employee(emp_no):
     data = request.json
     if not employee_exists(emp_no):
-        return make_response(jsonify({"error": "Employee not found"}), 404)
+        return format_response({"error": "Employee not found"}, 404)
 
     try:
         execute_query("""UPDATE employees SET first_name = %s, last_name = %s WHERE emp_no = %s""",
@@ -129,22 +140,22 @@ def update_employee(emp_no):
         mysql.connection.commit()
     except Exception as e:
         mysql.connection.rollback()
-        return make_response(jsonify({"error": str(e)}), 500)
-    return make_response(jsonify({"result": "Employee updated"}), 200)
+        return format_response({"error": str(e)}, 500)
+    return format_response({"result": "Employee updated"}, 200)
 
 
 @app.route("/employees/<emp_no>", methods=["DELETE"])
 def delete_employee(emp_no):
     if not employee_exists(emp_no):
-        return make_response(jsonify({"error": "Employee not found"}), 404)
+        return format_response({"error": "Employee not found"}, 404)
 
     try:
         execute_query("""DELETE FROM employees WHERE emp_no = %s""", [emp_no])
         mysql.connection.commit()
     except Exception as e:
         mysql.connection.rollback()
-        return make_response(jsonify({"error": str(e)}), 500)
-    return make_response(jsonify({"result": "Employee deleted"}), 200)
+        return format_response({"error": str(e)}, 500)
+    return format_response({"result": "Employee deleted"}, 200)
 
 
 if __name__ == "__main__":
