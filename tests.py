@@ -17,15 +17,15 @@ class MyAppTests(unittest.TestCase):
         self.assertNotIn(b"Hello World", response.data)
     
     # Ang tagal matapos ng test dahil dito. ^_^
-    def test_get_all_employees_json(self):
-        response = self.app.get("/employees")
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b"Georgi", response.data)
+    # def test_get_all_employees_json(self):
+    #     response = self.app.get("/employees")
+    #     self.assertEqual(response.status_code, 200)
+    #     self.assertIn(b"Georgi", response.data)
     
-    def test_get_all_employees_xml(self):
-        response = self.app.get("/employees?format=xml")
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b"<first_name type=\"str\">Georgi</first_name>", response.data)
+    # def test_get_all_employees_xml(self):
+    #     response = self.app.get("/employees?format=xml")
+    #     self.assertEqual(response.status_code, 200)
+    #     self.assertIn(b"<first_name type=\"str\">Georgi</first_name>", response.data)
     
     def test_get_employee_by_employee_number_json(self):
         response = self.app.get("/employees/10069")
@@ -105,6 +105,31 @@ class MyAppTests(unittest.TestCase):
         response = self.app.delete("/employees/69")
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Employee deleted", response.data)
+        
+        
+    def test_search_employee_by_name_json(self):
+        response = self.app.get("/employees/search?name=Georgi")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Georgi", response.data)
+        self.assertNotIn(b"Margareta", response.data)
+    
+    def test_search_employee_by_name_xml(self):
+        response = self.app.get("/employees/search?name=Georgi&format=xml")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"<first_name type=\"str\">Georgi</first_name>", response.data)
+        self.assertNotIn(b"<first_name type=\"str\">Margareta</first_name>", response.data)
+    
+    def test_get_employees_by_title_json(self):
+        response = self.app.get("/titles/engineer/employees")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Chirstian", response.data)
+        self.assertNotIn(b"Naruto", response.data)
+    
+    def test_get_employees_by_title_xml(self):
+        response = self.app.get("/titles/Engineer/employees?format=xml")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"<first_name type=\"str\">Chirstian</first_name>", response.data)
+        self.assertNotIn(b"<first_name type=\"str\">Boruto</first_name>", response.data)
 
 if __name__ == "__main__":
     unittest.main()

@@ -40,6 +40,8 @@ def index():
         <li><b>GET /employees/&lt;emp_no&gt;/department:</b> Returns the department of an employee</li>
         <li><b>GET /departments/&lt;dept_no&gt;/managers:</b> Returns the managers of a department</li>
         <li><b>GET /employees/&lt;emp_no&gt;/salaries:</b> Returns the salaries of an employee</li>
+        <li><b>GET /employees/search?name=&lt;name&gt;:</b> Search for an employee by their first name or last name</li>
+        <li><b>GET /titles/&lt;title&gt;/employees:</b> Returns a list of employees who have held a certain title</li>
         <li><b>POST /employees:</b> Create a new employee</li>
         <li><b>PUT /employees/&lt;emp_no&gt;:</b> Update an employee's details</li>
         <li><b>DELETE /employees/&lt;emp_no&gt;:</b> Delete an employee</li>
@@ -169,6 +171,34 @@ def delete_employee(emp_no):
         mysql.connection.rollback()
         return format_response({"error": str(e)}, 500)
     return format_response({"result": "Employee deleted"}, 200)
+
+
+@app.route("/employees/search", methods=["GET"])
+def search_employee_by_name():
+    name = request.args.get('name')
+    if not name:
+        return format_response({"error": "Missing parameter 'name'"}, 400)
+    rv = execute_query("SELECT * FROM employees WHERE first_name LIKE %s OR last_name LIKE %s", (f"%{name}%", f"%{name}%"))
+    if "error" in rv:
+        return format_response({"error": "Database error"}, 500)
+    if not rv:
+        return format_response({"error": "Employee not found"}, 404)
+    return format_response(rv, 200)
+
+
+@app.route("/titles/<title>/employees", methods=["GET"])
+def get_employees_by_title(title):
+    rv = execute_query("""
+        SELECT e.emp_no, e.first_name, e.last_name
+        FROM employees e
+        JOIN titles t ON e.emp_no = t.emp_no
+        WHERE t.title = %s
+        """, [title])
+    if "error" in rv:
+        return format_response({"error": "Database error"}, 500)
+    if not rv:
+        return format_response({"error": "Title not found"}, 404)
+    return format_response(rv, 200)
 
 
 if __name__ == "__main__":
