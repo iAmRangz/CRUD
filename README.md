@@ -18,24 +18,26 @@ cd CRUD
 
 # install the dependencies
 pip install -r requirements.txt
+```
 
 
-
-Database Configuration
+## Database Configuration
 The application is configured to interact with a MySQL database server running on localhost. The default configuration is as follows:
+```bash
 app.config['MYSQL_HOST'] = 'localhost'
 app.config["MYSQL_USER"] = "root"
 app.config["MYSQL_PASSWORD"] = "yourpassword"
 app.config["MYSQL_DB"] = "employees"
 app.config["MYSQL_CURSORCLASS"] = "DictCursor"
-
+```
 Please make sure to update the MYSQL_PASSWORD with your actual MySQL root password before running the application.
 
 
-Usage
+## Usage
 Running the application is straightforward:
+```bash
 cd CRUD
 python crud_app.py
-
+```
 
 The server will start, typically on http://localhost:5000. You can then access the API endpoints through this server.
