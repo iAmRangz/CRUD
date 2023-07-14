@@ -31,7 +31,20 @@ def employee_exists(emp_no):
 
 @app.route("/")
 def index():
-    return "Blank Homepage muna!"
+    return """
+    <h1>Welcome to the Employee Management API!</h1>
+    <p>Here are some available endpoints:</p>
+    <ul>
+        <li><b>GET /employees:</b> Returns a list of all employees</li>
+        <li><b>GET /employees/&lt;emp_no&gt;:</b> Returns the details of an employee by employee number</li>
+        <li><b>GET /employees/&lt;emp_no&gt;/department:</b> Returns the department of an employee</li>
+        <li><b>GET /departments/&lt;dept_no&gt;/managers:</b> Returns the managers of a department</li>
+        <li><b>GET /employees/&lt;emp_no&gt;/salaries:</b> Returns the salaries of an employee</li>
+        <li><b>POST /employees:</b> Create a new employee</li>
+        <li><b>PUT /employees/&lt;emp_no&gt;:</b> Update an employee's details</li>
+        <li><b>DELETE /employees/&lt;emp_no&gt;:</b> Delete an employee</li>
+    </ul>
+    """
 
 
 def format_response(data, status_code=200):

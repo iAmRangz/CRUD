@@ -13,7 +13,8 @@ class MyAppTests(unittest.TestCase):
     def test_index_page(self):
         response = self.app.get("/")
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b"Blank Homepage muna!", response.data)
+        self.assertIn(b"Welcome to the Employee Management API!", response.data)
+        self.assertNotIn(b"Hello World", response.data)
     
     # Ang tagal matapos ng test dahil dito. ^_^
     def test_get_all_employees_json(self):
